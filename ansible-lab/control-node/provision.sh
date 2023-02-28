@@ -1,4 +1,4 @@
-#!/bin/sh
+#/bin/sh
 
 sudo yum -y install epel-release #repository for ansible in centos
 echo "Installing Ansible..."

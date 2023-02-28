@@ -1,0 +1,33 @@
+---
+- name: Config DB server
+  hosts: db01
+
+  user: vagrant
+  become: true
+  vars:
+    dbname: "db01"
+    dbusername: "root"
+    dbpassword: "devopsmaonamassa"
+    mysql_root_password: devopsmaonamassa 
+    mysql_databases:
+      - name: notes 
+        encoding: latin1
+        collation: latin1_general_ci
+    mysql_users:
+      - name: notesapp 
+        host: "%"
+        password: devopsmaonamassa 
+        priv: "notes.*:ALL"
+  tasks:
+    - name: Config ansible hosts
+      lineinfile: 
+        dest: /etc/hosts 
+        state: present
+        line: "{{item}}"
+      with_items: 
+        - 192.168.56.2 control-node
+        - 192.168.56.3 app01
+        - 192.168.56.4 db01
+  roles:
+    - config-default-so
+    - role: geerlingguy.mysql

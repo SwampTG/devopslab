@@ -30,3 +30,13 @@ using Python.
 - Playbooks: YAML config archives for modules.
 - Plugins: Extended functionalities implemented by others.
 - Host inventory: Define the controlled hosts.
+- Roles - Tasks for the system. They can be obtained on Ansible Galaxy and reused.
+
+#### Control Node
+
+Accessed by sysadmins to initiate operations.
+Requires python and accepts most Linux and MacOS updated environments. Windows is not supported for production environments 
+
+#### Play books
+
+Use YAMLS that can be reutilised and used from Ansible Galaxy. Looks like a pipeline for Github or Gitlab.
