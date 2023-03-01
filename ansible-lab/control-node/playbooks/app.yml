@@ -1,0 +1,82 @@
+---
+- name: Config Java server
+  hosts: app01
+
+  user: vagrant
+  become: true
+
+  vars:
+    dbhost: "db01"
+    dbname: "notes"
+    dbusername: "notesapp"
+    dbpassword: "devopsmaonamassa"
+  tasks:
+    - name: Conifg hosts for ansible environment
+      lineinfile:
+        dest: /etc/hosts
+        state: present
+        line: "{{item}}"
+      with_items: 
+        - 192.168.56.2 control-node
+        - 192.168.56.3 app01
+        - 192.168.56.4 db01
+    - name: Add app user
+      user:
+        name: app
+        comment: App user
+        uid: 500
+    - name: Installs git
+      yum:
+        name: git
+        state: latest
+    - name: Install Maven
+      yum:
+        name: maven
+        state: latest
+    - name: Install Java
+      yum:
+        name: java-1.8.0-openjdk
+        state: latest
+    - name: Create app file structure
+      file:
+        path: /opt/notes
+        state: directory
+        owner: app
+        group: app
+    - name: Clone repo Notes - app
+      git: 
+        repo: 'https://github.com/callicoder/spring-boot-mysql-rest-api-tutorial.git'
+        dest: /opt/notes
+        clone: true
+        force: true
+    - name: Config properties file for data base environment and options
+      template:
+        src: application.properties
+        dest: /opt/notes/src/main/resources/application.properties
+    - name: Generate app jar
+      command: mvn -f /opt/notes/pom.xml package
+      become_user: app
+    - name: Register app version
+      shell:
+        cmd: mvn -o -q -Dexec.executable=echo -Dexec.args='${project.version}'
+        chdir: /opt/notes
+      register: app_version
+    - name: Configuring Systemd service
+      template:
+        src: etc/systemd/system/notes.service
+        dest: etc/systemd/system/notes.service
+        notify: reload daemon
+    - name: Init Notes App Service
+      service: Notes App
+      state: restarted
+  roles:
+    - config-default-so
+  handlers: 
+    - name: reload app
+      systemd:
+        state: restarted
+        daemon: true
+        name: Notes App
+    - name: reload daemon
+      systemd:
+        daemon_reexec: true

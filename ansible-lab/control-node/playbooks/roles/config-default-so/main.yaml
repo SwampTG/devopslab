@@ -2,7 +2,4 @@
   yum:
     name: '*'
     state: latest
-- name: Installs git
-  yum:
-    name: git
-    state: latest
+
