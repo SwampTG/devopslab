@@ -11,7 +11,7 @@
     dbusername: "notesapp"
     dbpassword: "devopsmaonamassa"
   tasks:
-    - name: Conifg hosts for ansible environment
+    - name: Config hosts for ansible environment
       lineinfile:
         dest: /etc/hosts
         state: present
@@ -32,7 +32,9 @@
     - name: Install Maven
       yum:
         name: maven
-        state: latest
+        state: present 
+    - name: Check mvn version
+      command: mvn --version
     - name: Install Java
       yum:
         name: java-1.8.0-openjdk
@@ -45,7 +47,7 @@
         group: app
     - name: Clone repo Notes - app
       git: 
-        repo: 'https://github.com/callicoder/spring-boot-mysql-rest-api-tutorial.git'
+        repo: 'https://github.com/SwampTG/spring-boot-mysql-rest-api-tutorial.git'
         dest: /opt/notes
         clone: true
         force: true
@@ -54,21 +56,22 @@
         src: application.properties
         dest: /opt/notes/src/main/resources/application.properties
     - name: Generate app jar
-      command: mvn -f /opt/notes/pom.xml package
+      command: mvn -f /opt/notes/pom.xml package -DskipTests
       become_user: app
     - name: Register app version
       shell:
-        cmd: mvn -o -q -Dexec.executable=echo -Dexec.args='${project.version}'
         chdir: /opt/notes
+        cmd: mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v '\['
       register: app_version
     - name: Configuring Systemd service
       template:
         src: etc/systemd/system/notes.service
-        dest: etc/systemd/system/notes.service
-        notify: reload daemon
+        dest: /etc/systemd/system/notes.service
+      notify: reload daemon
     - name: Init Notes App Service
-      service: Notes App
-      state: restarted
+      service:
+        state: restarted
+        name: notes
   roles:
     - config-default-so
   handlers: 
@@ -76,7 +79,7 @@
       systemd:
         state: restarted
         daemon: true
-        name: Notes App
+        name: notes
     - name: reload daemon
       systemd:
         daemon_reexec: true

@@ -1,5 +1,5 @@
 [Unit]
-Description="Notes App"
+Description=Notes App
 After=network.target
 
 [Service]
