@@ -1,7 +1,7 @@
 #!/bin/bash
 sudo yum install -q epel-release java-11-openjdk-devel yum-utils git -y
 
-sudo curl -fsSL https://pkg.jenkins.io/redhat-stable/jenkins.repo
+sudo curl -fsSL https://pkg.jenkins.io/redhat-stable/jenkins.repo -o /etc/yum.repos.d/jenkins.repo
 sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
 
 sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
